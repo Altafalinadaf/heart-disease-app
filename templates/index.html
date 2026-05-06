@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heart Disease Predictor</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <h1>❤️ Heart Disease Predictor</h1>
+
+        <div class="form-grid">
+
+            <div class="field">
+                <label>Age</label>
+                <input id="age" placeholder="e.g. 52">
+            </div>
+
+            <div class="field">
+                <label>Chest Pain</label>
+                <select id="cp">
+                    <option value="0">Typical</option>
+                    <option value="1">Atypical</option>
+                    <option value="2">Non-anginal</option>
+                    <option value="3">Asymptomatic</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Blood Pressure</label>
+                <input id="trestbps">
+            </div>
+
+            <div class="field">
+                <label>Cholesterol</label>
+                <input id="chol">
+            </div>
+
+            <div class="field">
+                <label>Fasting Sugar</label>
+                <select id="fbs">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>ECG</label>
+                <select id="restecg">
+                    <option value="0">Normal</option>
+                    <option value="1">Abnormal</option>
+                    <option value="2">Hypertrophy</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Max Heart Rate</label>
+                <input id="thalach">
+            </div>
+
+            <div class="field">
+                <label>Exercise Angina</label>
+                <select id="exang">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>ST Depression</label>
+                <input id="oldpeak">
+            </div>
+
+            <div class="field">
+                <label>Slope</label>
+                <select id="slope">
+                    <option value="0">Upsloping</option>
+                    <option value="1">Flat</option>
+                    <option value="2">Downsloping</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Vessels</label>
+                <input id="ca">
+            </div>
+
+            <div class="field">
+                <label>Thallium</label>
+                <select id="thal">
+                    <option value="3">Normal</option>
+                    <option value="6">Fixed Defect</option>
+                    <option value="7">Reversible</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="buttons">
+            <button onclick="fillSample()">Sample</button>
+            <button class="primary" onclick="predict()">Predict</button>
+        </div>
+
+        <div id="resultBox" class="hidden">
+            <h2 id="result"></h2>
+
+            <div class="progress">
+                <div id="bar"></div>
+            </div>
+
+            <p id="prob"></p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function fillSample() {
+    age.value = 52;
+    cp.value = 2;
+    trestbps.value = 125;
+    chol.value = 212;
+    fbs.value = 0;
+    restecg.value = 1;
+    thalach.value = 168;
+    exang.value = 0;
+    oldpeak.value = 1.0;
+    slope.value = 2;
+    ca.value = 0;
+    thal.value = 3;
+}
+
+function predict() {
+    let inputs = [
+        age.value,
+        cp.value,
+        trestbps.value,
+        chol.value,
+        fbs.value,
+        restecg.value,
+        thalach.value,
+        exang.value,
+        oldpeak.value,
+        slope.value,
+        ca.value,
+        thal.value
+    ].map(Number);
+
+    fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ input: inputs })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("resultBox").classList.remove("hidden");
+
+        result.innerText = data.result;
+        prob.innerText = "Risk: " + data.probability + "%";
+
+        let bar = document.getElementById("bar");
+        bar.style.width = data.probability + "%";
+
+        bar.style.background =
+            data.probability > 50 ? "#ef4444" : "#22c55e";
+    });
+}
+</script>
+
+</body>
+</html>
